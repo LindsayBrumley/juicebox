@@ -1,4 +1,4 @@
-const { client, getAllUsers, createUser } = require("./index");
+const { client, getAllUsers, createUser, updateUser } = require("./index");
 
 async function dropTables() {
   try {
@@ -16,11 +16,15 @@ async function dropTables() {
 async function createTables() {
   try {
     console.log("Starting to build tables...");
+
     await client.query(`
     CREATE TABLE  users (
       id SERIAL PRIMARY KEY, 
       username varchar(255) UNIQUE NOT NULL, 
-      password varchar(255) NOT NULL
+      password varchar(255) NOT NULL, 
+      name varchar(255) NOT NULL, 
+      location varchar(255) NOT NULL, 
+      active BOOLEAN DEFAULT true
     );`);
 
     console.log("Finished builing tables!");
@@ -39,11 +43,21 @@ async function createInitialUsers() {
       password: "bertie99",
     });
 
-    const albertTwo = await createUser({
-      username: "albert",
-      password: "imposter_albert",
+    console.log(albert);
+
+    const sandra = await createUser({
+      username: "sandra",
+      password: "2sandy4me",
     });
-    console.log("create user", albert);
+
+    console.log(sandra);
+
+    const glamgal = await createUser({
+      username: "glamgal",
+      password: "soglam",
+    });
+
+    console.log(glamgal);
 
     console.log("Finsihed creating users!");
   } catch (error) {
@@ -64,10 +78,27 @@ async function rebuildDB() {
 
 async function testDB() {
   try {
-    const { rows } = await client.query(`SELECT * FROM users;`);
-    console.log(rows);
+    console.log("starting to test database...");
+
+    console.log("Calling getAllUsers");
+
+    const users = await getAllUsers();
+
+    console.log("result:", users);
+
+    console.log("Calling updateUser on users[0]");
+
+    const updateUserResult = await updateUser(users[0].id, {
+      name: "Newname Sogood",
+      location: "Lesterville, KY",
+    });
+
+    console.log("Result:", updateUserResult);
+
+    console.log("Finishing database tests!");
   } catch (error) {
-    console.error(error);
+    console.error("Error testing database!");
+    throw error;
   }
 }
 // client
